@@ -6,6 +6,7 @@ substitutions:
 
 steps:
   - name: "gcr.io/cloud-builders/docker"
+    dir: "frontend"
     entrypoint: "bash"
     args:
       - "-c"
@@ -15,7 +16,7 @@ steps:
         if [ -z "$IMAGE" ]; then
           IMAGE="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}"
         fi
-        docker build -t "$IMAGE:$COMMIT_SHA" -t "$IMAGE:latest" -f frontend/Dockerfile frontend
+        docker build -t "$IMAGE:$COMMIT_SHA" -t "$IMAGE:latest" -f Dockerfile .
 
   - name: "gcr.io/cloud-builders/docker"
     entrypoint: "bash"
