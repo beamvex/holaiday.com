@@ -5,16 +5,30 @@ substitutions:
   _IMAGE: ""
 
 steps:
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: "Debug Workspace"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euxo pipefail
+        pwd
+        ls -la /workspace
+        ls -la /workspace/frontend
+        ls -la /workspace/frontend/Dockerfile
+        head -n 50 /workspace/frontend/Dockerfile
+
   - name: "gcr.io/cloud-builders/docker"
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        set -euo pipefail
+        set -euxo pipefail
         IMAGE="${_IMAGE}"
         if [ -z "$IMAGE" ]; then
           IMAGE="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}"
         fi
+        docker version
         docker build -t "$IMAGE:$COMMIT_SHA" -t "$IMAGE:latest" -f /workspace/frontend/Dockerfile /workspace/frontend
 
   - name: "gcr.io/cloud-builders/docker"
