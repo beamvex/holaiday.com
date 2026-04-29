@@ -9,7 +9,7 @@ variable "region" {
 
 variable "service_name" {
   type    = string
-  default = "frontend"
+  default = "holaiday-com"
 }
 
 variable "artifact_repo_id" {
