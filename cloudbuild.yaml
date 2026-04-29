@@ -1,0 +1,51 @@
+substitutions:
+  _REGION: "europe-west2"
+  _REPO: "frontend"
+  _SERVICE: "frontend"
+  _IMAGE: ""
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        IMAGE="${_IMAGE}"
+        if [ -z "$IMAGE" ]; then
+          IMAGE="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}"
+        fi
+        docker build -t "$IMAGE:$COMMIT_SHA" -t "$IMAGE:latest" -f frontend/Dockerfile frontend
+
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        IMAGE="${_IMAGE}"
+        if [ -z "$IMAGE" ]; then
+          IMAGE="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}"
+        fi
+        docker push "$IMAGE:$COMMIT_SHA"
+        docker push "$IMAGE:latest"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        IMAGE="${_IMAGE}"
+        if [ -z "$IMAGE" ]; then
+          IMAGE="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}"
+        fi
+        gcloud run deploy "${_SERVICE}" \
+          --image "$IMAGE:$COMMIT_SHA" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 80
+
+images:
+  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:$COMMIT_SHA"
